@@ -16,12 +16,11 @@ typedef struct No {
     struct No *direita;
 } No;
 
-// Função para obter a altura do nó
+// Funções de árvore AVL
 int altura(No *no) {
     return no ? no->altura : -1;
 }
 
-// Função para atualizar a altura do nó
 int max(int a, int b) {
     return (a > b) ? a : b;
 }
@@ -30,7 +29,6 @@ void atualizar_altura(No *no) {
     no->altura = max(altura(no->esquerda), altura(no->direita)) + 1;
 }
 
-// Rotação simples à esquerda
 No* rotacao_esquerda(No *y) {
     No *x = y->direita;
     y->direita = x->esquerda;
@@ -40,7 +38,6 @@ No* rotacao_esquerda(No *y) {
     return x;
 }
 
-// Rotação simples à direita
 No* rotacao_direita(No *y) {
     No *x = y->esquerda;
     y->esquerda = x->direita;
@@ -50,7 +47,6 @@ No* rotacao_direita(No *y) {
     return x;
 }
 
-// Rotação dupla à esquerda e direita
 No* rotacao_esquerda_direita(No *no) {
     no->esquerda = rotacao_esquerda(no->esquerda);
     return rotacao_direita(no);
@@ -61,7 +57,6 @@ No* rotacao_direita_esquerda(No *no) {
     return rotacao_esquerda(no);
 }
 
-// Função de balanceamento
 int fator_balanceamento(No *no) {
     return altura(no->esquerda) - altura(no->direita);
 }
@@ -84,7 +79,6 @@ No* balancear(No *no) {
     return no;
 }
 
-// Função de inserção de aluno
 No* inserir(No *raiz, Aluno aluno) {
     if (!raiz) {
         No *novo = (No*)malloc(sizeof(No));
@@ -104,13 +98,11 @@ No* inserir(No *raiz, Aluno aluno) {
     return balancear(raiz);
 }
 
-// Função para encontrar o menor nó na subárvore direita
 No* encontrar_minimo(No *no) {
     while (no->esquerda) no = no->esquerda;
     return no;
 }
 
-// Função de remoção de aluno
 No* remover(No *raiz, int matricula) {
     if (!raiz) return NULL;
 
@@ -133,7 +125,6 @@ No* remover(No *raiz, int matricula) {
     return balancear(raiz);
 }
 
-// Função de busca de aluno
 Aluno* buscar(No *raiz, int matricula) {
     if (!raiz) return NULL;
     if (matricula < raiz->aluno.matricula)
@@ -144,7 +135,6 @@ Aluno* buscar(No *raiz, int matricula) {
         return &raiz->aluno;
 }
 
-// Função de impressão da árvore AVL
 void imprimir_arvore(No *raiz, int nivel) {
     if (!raiz) return;
     imprimir_arvore(raiz->direita, nivel + 1);
@@ -153,42 +143,82 @@ void imprimir_arvore(No *raiz, int nivel) {
     imprimir_arvore(raiz->esquerda, nivel + 1);
 }
 
-// Função principal para teste
+// Função para exibir o menu
+void exibir_menu() {
+    printf("\n--- Menu ---\n");
+    printf("1. Inserir aluno\n");
+    printf("2. Buscar aluno\n");
+    printf("3. Imprimir arvore\n");
+    printf("4. Remover aluno\n");
+    printf("5. Sair\n");
+    printf("Escolha uma opcao: ");
+}
+
 int main() {
     No *raiz = NULL;
+    int opcao, matricula;
+    Aluno novo_aluno;
+    Aluno *aluno_encontrado;
 
-    Aluno aluno1 = {1, "Alice", "2022-02-10", "Ciencia da Computacao"};
-    Aluno aluno2 = {2, "Bob", "2021-08-15", "Engenharia"};
-    Aluno aluno3 = {3, "João", "2023-01-12", "Matematica"};
-    Aluno aluno4 = {7, "Mateus", "2023-03-12", "Quimica"};
-    Aluno aluno5 = {9, "Pierre", "2023-04-12", "Biologia"};
-    Aluno aluno6 = {10, "Lucas", "2023-05-12", "Letra"};
-    Aluno aluno7 = {20, "Jean", "2023-06-12", "Lingua"};
+    do {
+        exibir_menu();
+        scanf("%d", &opcao);
 
-    raiz = inserir(raiz, aluno1);
-    raiz = inserir(raiz, aluno2);
-    raiz = inserir(raiz, aluno3);
-    raiz = inserir(raiz, aluno4);
-    raiz = inserir(raiz, aluno5);
-    raiz = inserir(raiz, aluno6);
-    raiz = inserir(raiz, aluno7);
+        switch (opcao) {
+            case 1:
+                printf("\nInserir novo aluno:\n");
+                printf("Matricula: ");
+                scanf("%d", &novo_aluno.matricula);
+                getchar(); // Limpar o buffer de entrada
+                printf("Nome: ");
+                fgets(novo_aluno.nome, 50, stdin);
+                novo_aluno.nome[strcspn(novo_aluno.nome, "\n")] = '\0'; // Remover newline
+                printf("Data de entrada (YYYY-MM-DD): ");
+                scanf("%s", novo_aluno.data_entrada);
+                printf("Curso: ");
+                getchar(); // Limpar o buffer de entrada
+                fgets(novo_aluno.curso, 50, stdin);
+                novo_aluno.curso[strcspn(novo_aluno.curso, "\n")] = '\0'; // Remover newline
 
-    printf("Arvore AVL:\n");
-    imprimir_arvore(raiz, 0);
+                raiz = inserir(raiz, novo_aluno);
+                printf("Aluno inserido com sucesso!\n");
+                break;
 
-    printf("\nBuscando aluno com matricula:\n");
-    Aluno *aluno = buscar(raiz, 2);
-    if (aluno) {
-        printf("Encontrado: %s %i\n", aluno->nome, aluno->matricula);
-    } else {
-        printf("Aluno nao cadastrado.\n");
-    }
+            case 2:
+                printf("\nBuscar aluno:\n");
+                printf("Digite a matricula: ");
+                scanf("%d", &matricula);
+                aluno_encontrado = buscar(raiz, matricula);
+                if (aluno_encontrado) {
+                    printf("Encontrado: %s, Matricula: %d, Data de entrada: %s, Curso: %s\n",
+                           aluno_encontrado->nome, aluno_encontrado->matricula,
+                           aluno_encontrado->data_entrada, aluno_encontrado->curso);
+                } else {
+                    printf("Aluno nao encontrado.\n");
+                }
+                break;
 
-    printf("\nRemovendo aluno com matricula 2.\n");
-    raiz = remover(raiz, 2);
+            case 3:
+                printf("\nArvore AVL:\n");
+                imprimir_arvore(raiz, 0);
+                break;
 
-    printf("Arvore AVL apos remocao:\n");
-    imprimir_arvore(raiz, 0);
+            case 4:
+                printf("\nRemover aluno:\n");
+                printf("Digite a matricula: ");
+                scanf("%d", &matricula);
+                raiz = remover(raiz, matricula);
+                printf("Aluno removido (se encontrado).\n");
+                break;
+
+            case 5:
+                printf("Saindo do programa...\n");
+                break;
+
+            default:
+                printf("Opcao invalida. Tente novamente.\n");
+        }
+    } while (opcao != 5);
 
     return 0;
 }
